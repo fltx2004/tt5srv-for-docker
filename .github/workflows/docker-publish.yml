@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 concurrency:
   group: tt5srv-docker-publish
@@ -97,6 +98,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and push image
         uses: docker/build-push-action@v7
         with:
@@ -106,6 +114,8 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/tt5srv:${{ steps.release.outputs.version }}
             ${{ secrets.DOCKERHUB_USERNAME }}/tt5srv:latest
+            ghcr.io/fltx2004/tt5srv:${{ steps.release.outputs.version }}
+            ghcr.io/fltx2004/tt5srv:latest
           labels: |
             org.opencontainers.image.title=TeamTalk 5 Server
             org.opencontainers.image.version=${{ steps.release.outputs.version }}
